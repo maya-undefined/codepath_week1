@@ -1,10 +1,15 @@
 import chainlit as cl
 import openai
 
+from langsmith.wrappers import wrap_openai
+from langsmith import traceable
+
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
+
+LANGCHAIN_API_KEY=os.getenv("LANGCHAIN_API_KEY")
 
 api_key = os.getenv("OPENAI_API_KEY")
 
@@ -15,6 +20,7 @@ endpoint_url = "https://api.openai.com/v1"
 # endpoint_url = f"https://api.runpod.ai/v2/{runpod_serverless_id}/openai/v1"
 
 client = openai.AsyncClient(api_key=api_key, base_url=endpoint_url)
+client = wrap_openai(client)
 
 # https://platform.openai.com/docs/models/gpt-4o
 model_kwargs = {
@@ -23,7 +29,7 @@ model_kwargs = {
     "max_tokens": 500
 }
 
-
+@traceable
 @cl.on_message
 async def on_message(message: cl.Message):
     # Maintain an array of messages in the user session
